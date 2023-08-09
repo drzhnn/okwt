@@ -1,6 +1,6 @@
 # okwt
 
-This tool allows you to convert any file into a `.wav` wavetable, and perform useful operations on its frames.
+This tool allows you to convert any file into a wavetable, and perform useful operations on its frames.
 
 ## Table of Contents
 
@@ -54,6 +54,7 @@ What okwt can do for you:
 - create wavetables from image files (`.png`, `.jpg`, `.tiff`)
 - create wavetables from non-audio files
 - apply effects to wavetable frames
+- save wavetables as `.wav` or `.wt` files
 
 ## Installation
 

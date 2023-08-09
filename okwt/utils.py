@@ -186,3 +186,18 @@ def write_wav(
         outfile.write(srge_packed)
         outfile.write(data_header_packed)
         audio_data.tofile(outfile)
+
+
+def write_wt(
+    filename_out: str,
+    audio_data: np.ndarray,
+    num_frames: int,
+    frame_size: int,
+    flags: int = 0,
+):
+    header = (b"vawt", frame_size, num_frames, flags)
+    header_packed = struct.pack("<4s i H H", *header)
+
+    with open(filename_out, "wb") as outfile:
+        outfile.write(header_packed)
+        audio_data.tofile(outfile)

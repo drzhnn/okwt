@@ -169,7 +169,7 @@ def get_cli():
         "--outfile",
         required=False,
         metavar="FILE",
-        help="output wavetable file",
+        help="output wavetable file. Supported formats: WAV, WT",
     )
     output_group.add_argument(
         "--num-frames",

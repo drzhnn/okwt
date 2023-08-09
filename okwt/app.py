@@ -22,11 +22,7 @@ from .dsp import (
     trim,
 )
 from .formats import InputFile
-from .utils import (
-    get_frame_size_from_hint,
-    pad_audio_data,
-    write_wav,
-)
+from .utils import get_frame_size_from_hint, pad_audio_data, write_wav, write_wt
 
 
 def main() -> None:
@@ -170,16 +166,28 @@ def main() -> None:
                     comment=cli.comment or f"Frame {i+1:03}",
                 )
         else:
-            write_wav(
-                filename_out=cli.outfile,
-                audio_data=audio_data,
-                frame_size=frame_size,
-                num_frames=out_num_frames,
-                samplerate=samplerate,
-                add_uhwt_chunk=cli.add_uhwt,
-                add_srge_chunk=cli.add_srge,
-                comment=cli.comment,
-            )
+            outfile_extension = Path(cli.outfile).suffix
+            if outfile_extension == ".wav":
+                write_wav(
+                    filename_out=cli.outfile,
+                    audio_data=audio_data,
+                    frame_size=frame_size,
+                    num_frames=out_num_frames,
+                    samplerate=samplerate,
+                    add_uhwt_chunk=cli.add_uhwt,
+                    add_srge_chunk=cli.add_srge,
+                    comment=cli.comment,
+                )
+            elif outfile_extension == ".wt":
+                write_wt(
+                    filename_out=cli.outfile,
+                    audio_data=audio_data,
+                    frame_size=frame_size,
+                    num_frames=out_num_frames,
+                    flags=0,
+                )
+            else:
+                raise NotImplementedError
 
             print("\nOutput file details:")
             outfile = InputFile(cli.outfile).recognize_type().parse()
