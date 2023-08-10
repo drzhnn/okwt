@@ -98,7 +98,11 @@ Convert any file into the most universal wavetable format:
 
 `okwt --infile audio.wav --outfile wavetable.wav`
 
-If your synth still refuses to load the resulting file, then try adding metadata chunks, or resample to 256-frame wavetable (see [Advanced examples](#advanced-examples))
+If your synth still refuses to load the resulting file, then try adding metadata chunks, or resample to 256-frame wavetable (see [Advanced examples](#advanced-examples)).
+
+To save file as `.wt` wavetable use this command:
+
+`okwt --infile audio.wav --outfile wavetable.wt`
 
 #### Add chunks
 
