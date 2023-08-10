@@ -175,7 +175,7 @@ def get_cli():
         "--num-frames",
         type=int,
         help=(
-            "force total number of frames. Most useful wien used with --resize"
+            "force total number of frames. Most useful when used with --resize"
         ),
     )
     output_group.add_argument(
