@@ -47,10 +47,11 @@ What okwt can do for you:
     - `.wt`: Surge, Bitwig Studio
     - `.wt`: Dune3 (experimental support)
     - `.vitaltable`: Vital Audio (experimental support for sample based wavetables)
+- read compressed audio formats (`.flac`, `.wv`, `.opus`, `.mp3` etc.)
 - extract useful information from wavetable chunks (`uhWT`, `srge`, `clm`)
 - fix "unreadable" wavetables and resave them as correctly formatted `.wav`'s
 - write wavetable metadata chunks (`uhWT`, `srge`)
-- create wavetables from regular `.wav` files
+- create wavetables from regular (non-wavetable) `.wav` files
 - create wavetables from image files (`.png`, `.jpg`, `.tiff`)
 - create wavetables from non-audio files
 - apply effects to wavetable frames
@@ -199,6 +200,10 @@ Try this if you want to change the frame size, say from 1024 to 2048 samples:
 
 - numpy
 - pillow
+
+Optional:
+
+- [ffmpeg](https://ffmpeg.org)
 
 ## Links
 

@@ -302,7 +302,7 @@ class Ffmpeg(InputFile):
             elif chunk_id == b"data":
                 # When piping, ffmpeg sets the size of data chunk to -1.
                 # So we assume that `data` is the last chunk in the file
-                # and load everthing after 'data' chunk's header as audio data
+                # and load everything after 'data' chunk's header as audio data
                 if chunk_length == -1:
                     chunk_length = cache_size - starts_at - chunk_header_length
 
