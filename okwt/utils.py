@@ -231,4 +231,7 @@ def ffmpeg_read(filename_in: str, samplerate_in: int) -> bytes:
     ) as process:
         cache, error = process.communicate(timeout=3)
 
+    if error:
+        raise RuntimeError(f"ffmpeg failed: {error!r}")
+
     return cache
