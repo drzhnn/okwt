@@ -276,11 +276,12 @@ class Ffmpeg(InputFile):
 
     @cached_property
     def cache(self):
+        windows_safe_infile = f"'{self.infile}'"
         samplerate_in = ffprobe_samplerate(
-            self.infile, Constant.DEFAULT_SAMPLERATE
+            windows_safe_infile, Constant.DEFAULT_SAMPLERATE
         )
 
-        cache = ffmpeg_read(self.infile, samplerate_in)
+        cache = ffmpeg_read(windows_safe_infile, samplerate_in)
         return cache
 
     def parse(self):
