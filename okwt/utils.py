@@ -1,9 +1,10 @@
 import base64
 import re
-import struct
 import shlex
-from hashlib import md5
+import struct
 import subprocess
+from hashlib import md5
+
 import numpy as np
 
 
