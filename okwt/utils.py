@@ -196,6 +196,7 @@ def write_wt(
     frame_size: int,
     flags: int = 0,
 ) -> None:
+    """Write data array as float32 .wt file"""
     header = (b"vawt", frame_size, num_frames, flags)
     header_packed = struct.pack("<4s i H H", *header)
 
@@ -218,7 +219,8 @@ def ffprobe_samplerate(filename_in: str, fallback_samplerate: int) -> int:
         return fallback_samplerate
 
 
-def ffmpeg_read(filename_in: str, samplerate_in: int):
+def ffmpeg_read(filename_in: str, samplerate_in: int) -> bytes:
+    """Decode compressed media file into float32 PCM WAVE data"""
     read_as_float32 = f"ffmpeg -hide_banner -v error -i {filename_in} "
     read_as_float32 += f"-f wav -c:a pcm_f32le -ar {samplerate_in} -"
 
