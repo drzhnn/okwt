@@ -7,8 +7,16 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageFilter
 
-from .utils import b64_to_array, bytes_to_array, get_md5, to_float32, to_mono
 from .constants import Constant
+from .utils import (
+    b64_to_array,
+    bytes_to_array,
+    ffmpeg_read,
+    ffprobe_samplerate,
+    get_md5,
+    to_float32,
+    to_mono,
+)
 
 
 class InputFile:
@@ -61,6 +69,8 @@ class InputFile:
             return VitalTable(self.infile)
         elif self.extension in Picture.SUPPORTED_FORMATS:
             return Picture(self.infile)
+        elif self.extension in Ffmpeg.SUPPORTED_FORMATS:
+            return Ffmpeg(self.infile)
         else:
             return Raw(self.infile)
 
@@ -220,6 +230,101 @@ class Wav(InputFile):
         num_frames = len(audio_data) / frame_size
 
         md5 = get_md5(audio_data)
+        info = namedtuple(
+            "info",
+            [
+                "chunks",
+                "audio_data",
+                "frame_size",
+                "num_frames",
+                "md5",
+            ],
+        )
+        return info(
+            structure,
+            audio_data,
+            frame_size,
+            num_frames,
+            md5,
+        )
+
+
+class Ffmpeg(InputFile):
+    SUPPORTED_FORMATS = [
+        ".flac",
+        ".wv",
+        ".alac",
+        ".ape",
+        ".tta",
+        ".mp3",
+        ".ogg",
+        ".opus",
+        ".aac",
+    ]
+
+    import shutil
+    import sys
+
+    sys.tracebacklimit = 0
+
+    for app in ["ffmpeg", "ffprobe"]:
+        if not shutil.which(app):
+            raise OSError(f"{app} binary not found")
+
+    def __init__(self, infile):
+        super().__init__(infile)
+
+    @cached_property
+    def cache(self):
+        samplerate_in = ffprobe_samplerate(
+            self.infile, Constant.DEFAULT_SAMPLERATE
+        )
+
+        cache = ffmpeg_read(self.infile, samplerate_in)
+        return cache
+
+    def parse(self):
+        riff = Chunk.riff(self.cache, 0)
+        structure = [riff]
+
+        chunk_header = "<4s i"
+        chunk_header_length = struct.calcsize(chunk_header)
+
+        starts_at = Wav.RIFF_HEADER_LENGTH
+        cache_size = len(self.cache)
+        while starts_at < cache_size:
+            chunk_id, chunk_length = struct.unpack_from(
+                chunk_header, self.cache, starts_at
+            )
+            if chunk_id == b"fmt ":
+                fmt_chunk = Chunk.fmt(self.cache, starts_at)
+                structure.append(fmt_chunk)
+            elif chunk_id == b"data":
+                # When piping, ffmpeg sets the size of data chunk to -1.
+                # So we assume that `data` is the last chunk in the file
+                # and load everthing after 'data' chunk's header as audio data
+                if chunk_length == -1:
+                    chunk_length = cache_size - starts_at - chunk_header_length
+
+                data_chunk, audio_bytes = Chunk.data(
+                    self.cache, starts_at, chunk_length
+                )
+                structure.append(data_chunk)
+            else:
+                unknown_chunk = Chunk.unknown(self.cache, starts_at)
+                structure.append(unknown_chunk)
+            starts_at += chunk_header_length + chunk_length
+            starts_at += 1 if chunk_length % 2 else 0
+
+        audio_data = bytes_to_array(audio_bytes, fmt_chunk)
+        audio_data = to_mono(audio_data)
+
+        frame_size = Constant.DEFAULT_FRAME_SIZE
+
+        num_frames = len(audio_data) / frame_size
+
+        md5 = get_md5(audio_data)
+
         info = namedtuple(
             "info",
             [

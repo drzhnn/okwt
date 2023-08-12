@@ -1,8 +1,9 @@
 import base64
 import re
 import struct
+import shlex
 from hashlib import md5
-
+import subprocess
 import numpy as np
 
 
@@ -194,10 +195,38 @@ def write_wt(
     num_frames: int,
     frame_size: int,
     flags: int = 0,
-):
+) -> None:
     header = (b"vawt", frame_size, num_frames, flags)
     header_packed = struct.pack("<4s i H H", *header)
 
     with open(filename_out, "wb") as outfile:
         outfile.write(header_packed)
         audio_data.tofile(outfile)
+
+
+def ffprobe_samplerate(filename_in: str, fallback_samplerate: int) -> int:
+    """Probe media file (using 'ffprobe') and find its samplerate"""
+    ffprobe_command = f"ffprobe -hide_banner {filename_in}"
+    ffprobe_out = subprocess.check_output(
+        shlex.split(ffprobe_command), stderr=subprocess.STDOUT
+    )
+    samplerate_match = re.search(r"(\d+) Hz", ffprobe_out.decode("utf-8"))
+
+    if samplerate_match:
+        return int(samplerate_match.group(1))
+    else:
+        return fallback_samplerate
+
+
+def ffmpeg_read(filename_in: str, samplerate_in: int):
+    read_as_float32 = f"ffmpeg -hide_banner -v error -i {filename_in} "
+    read_as_float32 += f"-f wav -c:a pcm_f32le -ar {samplerate_in} -"
+
+    with subprocess.Popen(
+        shlex.split(read_as_float32),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ) as process:
+        cache, error = process.communicate(timeout=3)
+
+    return cache
