@@ -12,16 +12,22 @@ def bytes_to_array(audio_bytes: bytes, fmt_chunk):
     """Convert bytes to array"""
     bytes_per_sample = fmt_chunk.block_align // fmt_chunk.num_channels
 
+    # PCM
     if fmt_chunk.codec_id == 1:
-        if fmt_chunk.bitdepth in {16, 24, 32}:
+        if fmt_chunk.bitdepth in {16, 32}:
             dtype = f"<i{bytes_per_sample}"
+        # 24-bit data needs reformatting
+        elif fmt_chunk.bitdepth == 24:
+            dtype = "V1"
         else:
             raise ValueError("Unsupported bit depth:", fmt_chunk.bitdepth)
+    # IEEE float
     elif fmt_chunk.codec_id == 3:
         if fmt_chunk.bitdepth in {32, 64}:
             dtype = f"<f{bytes_per_sample}"
         else:
             raise ValueError("Unsupported bit depth:", fmt_chunk.bitdepth)
+    # Extensible
     elif fmt_chunk.codec_id == 65534:
         if fmt_chunk.codec_id_hint == 1:
             dtype = f"<i{bytes_per_sample}"
@@ -39,7 +45,29 @@ def bytes_to_array(audio_bytes: bytes, fmt_chunk):
             f"bitdepth: {fmt_chunk.bitdepth}",
         )
 
-    audio_data = np.frombuffer(audio_bytes, dtype=dtype)
+    # Reformat 24-bit data
+    if dtype == "V1":
+        data_size = len(audio_bytes)
+        bytes_to_read = data_size - (data_size % bytes_per_sample)
+
+        # Read as raw bytes (void)
+        raw_data = np.frombuffer(audio_bytes[:bytes_to_read], dtype=dtype)
+        raw_data = raw_data.reshape(-1, bytes_per_sample)
+
+        # Define new dtype
+        new_dtype = "<i4" if bytes_per_sample == 3 else "<i8"
+
+        # Create zero-filled array for future data
+        new_array = np.zeros(
+            (bytes_to_read // bytes_per_sample, np.dtype(new_dtype).itemsize),
+            dtype="V1",
+        )
+
+        # Transfer data
+        new_array[:, -bytes_per_sample:] = raw_data
+        audio_data = new_array.view(new_dtype).reshape(new_array.shape[:-1])
+    else:
+        audio_data = np.frombuffer(audio_bytes, dtype=dtype)
 
     if fmt_chunk.num_channels > 1:
         audio_data = audio_data.reshape(-1, fmt_chunk.num_channels)
