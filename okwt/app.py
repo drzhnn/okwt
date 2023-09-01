@@ -22,7 +22,12 @@ from .dsp import (
     trim,
 )
 from .formats import InputFile
-from .utils import get_frame_size_from_hint, pad_audio_data, write_wav, write_wt
+from .utils import (
+    get_frame_size_from_hint,
+    pad_audio_data,
+    write_wav,
+    write_wt,
+)
 
 
 def main() -> None:
@@ -35,9 +40,10 @@ def main() -> None:
     if not Path(infile).exists():
         raise FileNotFoundError(infile)
 
-    print("Input file details:")
     infile_obj = InputFile(infile)
     content = infile_obj.recognize_type().parse()
+
+    print("Input file details:")
     pprint(dict(content._asdict()), sort_dicts=False)
 
     frame_size_hint: int = get_frame_size_from_hint(infile_obj.name)

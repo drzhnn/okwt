@@ -1,5 +1,7 @@
 import json
+import shutil
 import struct
+import sys
 from collections import namedtuple
 from functools import cached_property
 from pathlib import Path
@@ -7,6 +9,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageFilter
 
+from .cli import get_cli
 from .constants import Constant
 from .utils import (
     b64_to_array,
@@ -265,26 +268,57 @@ class Ffmpeg(InputFile):
         ".aifc",
     ]
 
-    import shutil
-    import sys
+    @staticmethod
+    def get_ffmpeg() -> tuple:
+        cli = get_cli()
+
+        """Get ffmpeg and ffprobe paths"""
+        if cli.ffmpeg_path == "ffmpeg":
+            # Search for ffmpeg and ffprobe binaries in PATH
+            ffmpeg = shutil.which("ffmpeg")
+            ffprobe = shutil.which("ffprobe")
+            if not ffmpeg:
+                raise OSError("ffmpeg binary not found in PATH")
+            if not ffprobe:
+                raise OSError("ffprobe binary not found in PATH")
+        else:
+            # Check whether provided path exists and if it is dir or file
+            if Path(cli.ffmpeg_path).exists():
+                if Path(cli.ffmpeg_path).is_dir():
+                    ffmpeg = str(Path(cli.ffmpeg_path) / "ffmpeg")
+                    ffprobe = str(Path(cli.ffmpeg_path) / "ffprobe")
+                else:
+                    ffmpeg = cli.ffmpeg_path
+                    ffprobe = str(Path(cli.ffmpeg_path).parent / "ffprobe")
+            else:
+                raise OSError(f"{cli.ffmpeg_path} doesn't exist")
+
+            # Check if constructed path to each binary exists
+            if not Path(ffmpeg).exists():
+                raise OSError(f"ffmpeg binary not found at {ffmpeg}")
+
+            if not Path(ffprobe).exists():
+                raise OSError(f"ffprobe binary not found at {ffprobe}")
+
+        print("\nUsing", ffprobe)
+        print("Using", ffmpeg, "\n")
+
+        return ffmpeg, ffprobe
 
     sys.tracebacklimit = 0
 
-    for app in ["ffmpeg", "ffprobe"]:
-        if not shutil.which(app):
-            raise OSError(f"{app} binary not found")
-
     def __init__(self, infile):
         super().__init__(infile)
+        self.ffmpeg, self.ffprobe = self.get_ffmpeg()
 
     @cached_property
     def cache(self):
         windows_safe_infile = f"'{self.infile}'"
         samplerate_in = ffprobe_samplerate(
-            windows_safe_infile, Constant.DEFAULT_SAMPLERATE
+            windows_safe_infile, Constant.DEFAULT_SAMPLERATE, self.ffprobe
         )
 
-        cache = ffmpeg_read(windows_safe_infile, samplerate_in)
+        cache = ffmpeg_read(windows_safe_infile, samplerate_in, self.ffmpeg)
         return cache
 
     def parse(self):

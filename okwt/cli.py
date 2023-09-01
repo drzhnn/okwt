@@ -22,6 +22,13 @@ def get_cli():
         action="store_true",
         help="show detailed error messages",
     )
+    parser.add_argument(
+        "--ffmpeg-path",
+        required=False,
+        metavar="PATH",
+        default="ffmpeg",
+        help="path to ffmpeg binary",
+    )
 
     input_group = parser.add_argument_group("input options")
     input_group.add_argument(
