@@ -147,7 +147,7 @@ def resize(
         )
         new_array = np.array(pil_resized, dtype=np.float32)
         reshaped = new_array.reshape(-1)
-        processing_log.append("Resize mode: bicubic)")
+        processing_log.append("Resize mode: bicubic")
         return reshaped
     elif resize_mode in "geometric":
         # Sample more often at the beginning
