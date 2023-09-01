@@ -260,6 +260,9 @@ class Ffmpeg(InputFile):
         ".ogg",
         ".opus",
         ".aac",
+        ".aif",
+        ".aiff",
+        ".aifc",
     ]
 
     import shutil
