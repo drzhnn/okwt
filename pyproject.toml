@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "okwt"
-version = "1.3.0"
+version = "1.3.1"
 description = "Wavetable creation and manupilation tool"
 authors = ["Denis Druzhinin <denis@drzhnn.ru>"]
 repository = "https://github.com/drzhnn/okwt.git"
