@@ -238,7 +238,7 @@ def ffprobe_samplerate(
     filename_in: str, fallback_samplerate: int, ffprobe_path: str
 ) -> int:
     """Probe media file (using 'ffprobe') and find its samplerate"""
-    ffprobe_command = f"{ffprobe_path} -hide_banner {filename_in}"
+    ffprobe_command = f"'{ffprobe_path}' -hide_banner {filename_in}"
     ffprobe_out = subprocess.check_output(
         shlex.split(ffprobe_command), stderr=subprocess.STDOUT
     )
@@ -254,7 +254,7 @@ def ffmpeg_read(
     filename_in: str, samplerate_in: int, ffmpeg_path: str
 ) -> bytes:
     """Decode compressed media file into float32 PCM WAVE data"""
-    read_as_float32 = f"{ffmpeg_path} -hide_banner -v error -i {filename_in} "
+    read_as_float32 = f"'{ffmpeg_path}' -hide_banner -v error -i {filename_in} "
     read_as_float32 += f"-f wav -c:a pcm_f32le -ar {samplerate_in} -"
 
     with subprocess.Popen(
