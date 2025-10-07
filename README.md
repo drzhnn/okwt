@@ -21,11 +21,11 @@ So I asked around, and it turned out `.wav` is just a filename extension and can
 
 Well, maybe okwt can help you with that.
 
-The most important property of any wavetable is its __frame size__: the number of individual samples in a single __frame__ (one waveform cycle). If we know that number, we can divide the overall size of audio data by that amount and we'll get a __number of frames__ in that wavetable. 
+The most important property of any wavetable is its **frame size**: the number of individual samples in a single **frame** (one waveform cycle). If we know that number, we can divide the overall size of audio data by that amount and we'll get a **number of frames** in that wavetable.
 
-By the way, wavetables work in frame rate (frames per second) domain, and the usual __sample rate__ (samples per second) property of the `.wav` file doesn't mean anything in the world of wavetables. Sample rate is just a value in 'fmt' metadata chunk of the `.wav` file, required by the PCM WAVE specification. Sample rate only matters when previewing wavetable files in a media player or audio editor. But I digress...
+By the way, wavetables work in frame rate (frames per second) domain, and the usual **sample rate** (samples per second) property of the `.wav` file doesn't mean anything in the world of wavetables. Sample rate is just a value in 'fmt' metadata chunk of the `.wav` file, required by the PCM WAVE specification. Sample rate only matters when previewing wavetable files in a media player or audio editor. But I digress...
 
-Let's say we have a wavetable `.wav` file which is 4096 samples long. Do you know how many frames it is? Is it 2 * 2048 or 4 * 1024 or else? How would a synth know? It won't. If there is no additional information in file's metadata (or if the synth can't read that kind of metadata), then it will use its __fallback frame size__. And every developer seems to have their own idea on what that value should be:
+Let's say we have a wavetable `.wav` file which is 4096 samples long. Do you know how many frames it is? Is it 2 _ 2048 or 4 _ 1024 or else? How would a synth know? It won't. If there is no additional information in file's metadata (or if the synth can't read that kind of metadata), then it will use its **fallback frame size**. And every developer seems to have their own idea on what that value should be:
 
 - Hive: 2048 samples
 - Vital: 2048 samples
@@ -42,11 +42,11 @@ Most of the synths listed above are capable of loading 256-frame long wavetables
 
 What okwt can do for you:
 
-- read popular wavetable formats:  
-    - `.wav`: 16-bit, 24-bit, 32-bit
-    - `.wt`: Surge, Bitwig Studio
-    - `.wt`: Dune3 (experimental support)
-    - `.vitaltable`: Vital Audio (experimental support for sample based wavetables)
+- read popular wavetable formats:
+  - `.wav`: 16-bit, 24-bit, 32-bit
+  - `.wt`: Surge, Bitwig Studio
+  - `.wt`: Dune3 (experimental support)
+  - `.vitaltable`: Vital Audio (experimental support for sample based wavetables)
 - read compressed audio formats (`.flac`, `.wv`, `.opus`, `.mp3` etc.)
 - extract useful information from wavetable chunks (`uhWT`, `srge`, `clm`)
 - fix "unreadable" wavetables and resave them as correctly formatted `.wav`'s
@@ -59,31 +59,36 @@ What okwt can do for you:
 
 ## Installation
 
-1. Using pip: `pip install okwt`  
+1. Using pip: `pip install okwt`
 
-2. From source:  
-  - `git clone https://github.com/drzhnn/okwt.git`  
-  - `cd okwt`  
-  - `pip install .`  
+2. From source:
 
-3. From source using [poetry](https://python-poetry.org/docs/#installation):  
-  - `git clone https://github.com/drzhnn/okwt.git`  
-  - `cd okwt`  
-  - `poetry install`  
+- `git clone https://github.com/drzhnn/okwt.git`
+- `cd okwt`
+- `pip install .`
+
+3. From source using `uv`:
+
+- `git clone https://github.com/drzhnn/okwt.git`
+- `cd okwt`
+- `uv venv`
+- `source .venv/bin/activate`
+- `uv sync`
+- `uv run okwt --help`
 
 ## Usage
 
-Show help: 
+Show help:
 
-`okwt --help`  
+`okwt --help`
 
-Show audio file details: 
+Show audio file details:
 
 `okwt --infile audio.wav`
 
 #### Convert any file to wavetable
 
-Convert any file into the most universal wavetable format: 
+Convert any file into the most universal wavetable format:
 
 - Extension: .wav
 - Container: RIFF
@@ -109,8 +114,8 @@ To save file as `.wt` wavetable use this command:
 
 Some synths require additional information in order to read wavetables correctly. This information (frame size, number of frames etc.) is usually stored in special metadata chunks inside .wav file. With okwt you can add 'uhWT' and 'srge' chunks:
 
-`okwt --infile audio.wav --outfile wavetable.wav --add-uhwt`  
-`okwt --infile audio.wav --outfile wavetable.wav --add-srge`  
+`okwt --infile audio.wav --outfile wavetable.wav --add-uhwt`
+`okwt --infile audio.wav --outfile wavetable.wav --add-srge`
 
 #### Create wavetables from image files
 
@@ -211,4 +216,3 @@ Other command line tools for working with wavetables:
 
 1. [osc-gen](https://github.com/harveyormston/osc_gen)
 2. [wt-tool](https://github.com/surge-synthesizer/surge/tree/main/scripts/wt-tool)
-
