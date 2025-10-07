@@ -1,6 +1,6 @@
 [project]
 name = "okwt"
-version = "1.4.1"
+version = "1.4.2"
 description = "Wavetable creation and manupilation tool"
 authors = [
     { name = "Denis Druzhinin", email = "denis@drzhnn.ru" }
