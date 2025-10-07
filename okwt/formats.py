@@ -195,9 +195,7 @@ class Wav(InputFile):
 
         starts_at = Wav.RIFF_HEADER_LENGTH
         while starts_at < len(self.cache):
-            chunk_id, chunk_length = struct.unpack_from(
-                chunk_header, self.cache, starts_at
-            )
+            chunk_id, chunk_length = struct.unpack_from(chunk_header, self.cache, starts_at)
             if chunk_id == b"fmt ":
                 fmt_chunk = Chunk.fmt(self.cache, starts_at)
                 structure.append(fmt_chunk)
@@ -210,9 +208,7 @@ class Wav(InputFile):
                 structure.append(srge_chunk)
                 has_srge = True
             elif chunk_id == b"data":
-                data_chunk, audio_bytes = Chunk.data(
-                    self.cache, starts_at, chunk_length
-                )
+                data_chunk, audio_bytes = Chunk.data(self.cache, starts_at, chunk_length)
                 structure.append(data_chunk)
             else:
                 unknown_chunk = Chunk.unknown(self.cache, starts_at)
@@ -314,9 +310,7 @@ class Ffmpeg(InputFile):
     @cached_property
     def cache(self):
         windows_safe_infile = f"'{self.infile}'"
-        samplerate_in = ffprobe_samplerate(
-            windows_safe_infile, Constant.DEFAULT_SAMPLERATE, self.ffprobe
-        )
+        samplerate_in = ffprobe_samplerate(windows_safe_infile, Constant.DEFAULT_SAMPLERATE, self.ffprobe)
 
         cache = ffmpeg_read(windows_safe_infile, samplerate_in, self.ffmpeg)
         return cache
@@ -331,9 +325,7 @@ class Ffmpeg(InputFile):
         starts_at = Wav.RIFF_HEADER_LENGTH
         cache_size = len(self.cache)
         while starts_at < cache_size:
-            chunk_id, chunk_length = struct.unpack_from(
-                chunk_header, self.cache, starts_at
-            )
+            chunk_id, chunk_length = struct.unpack_from(chunk_header, self.cache, starts_at)
             if chunk_id == b"fmt ":
                 fmt_chunk = Chunk.fmt(self.cache, starts_at)
                 structure.append(fmt_chunk)
@@ -344,9 +336,7 @@ class Ffmpeg(InputFile):
                 if chunk_length == -1:
                     chunk_length = cache_size - starts_at - chunk_header_length
 
-                data_chunk, audio_bytes = Chunk.data(
-                    self.cache, starts_at, chunk_length
-                )
+                data_chunk, audio_bytes = Chunk.data(self.cache, starts_at, chunk_length)
                 structure.append(data_chunk)
             else:
                 unknown_chunk = Chunk.unknown(self.cache, starts_at)
@@ -394,9 +384,7 @@ class Raw(InputFile):
 
         data_with_nans = np.frombuffer(self.cache, dtype=np.float32)
         audio_data = np.nan_to_num(data_with_nans)
-        normalized_data = (
-            audio_data.astype(np.float32) / np.finfo(audio_data.dtype).max
-        )
+        normalized_data = audio_data.astype(np.float32) / np.finfo(audio_data.dtype).max
         clipped_data = np.clip(normalized_data, -0.01, 0.01) * 99.9
         frame_size = 2048
 
@@ -448,9 +436,7 @@ class Chunk(Wav):
             ],
         )
         fmt_head_format = "<4s i"
-        chunk_id, chunk_size = struct.unpack_from(
-            fmt_head_format, cache, offset
-        )
+        chunk_id, chunk_size = struct.unpack_from(fmt_head_format, cache, offset)
 
         if chunk_size in {16, 18}:
             fmt_format = "<H H i i H H"
@@ -459,9 +445,7 @@ class Chunk(Wav):
         else:
             raise ValueError("Unexpected size of 'fmt' chunk:", chunk_size)
 
-        fmt_values = struct.unpack_from(
-            fmt_format, cache, offset + struct.calcsize(fmt_head_format)
-        )
+        fmt_values = struct.unpack_from(fmt_format, cache, offset + struct.calcsize(fmt_head_format))
 
         if len(fmt_values) == 6:
             fmt_values = *fmt_values, None, None, None, None
@@ -477,9 +461,7 @@ class Chunk(Wav):
         )
         uhwt_format = "<4s i 4x i i 4x 256s"
         uhwt_values = struct.unpack_from(uhwt_format, cache, offset)
-        uhwt_decoded = uhwt_values[:4] + (
-            uhwt_values[4].replace(b"\x00", b"").decode(),
-        )
+        uhwt_decoded = uhwt_values[:4] + (uhwt_values[4].replace(b"\x00", b"").decode(),)
         return chunk(*uhwt_decoded)
 
     @classmethod
@@ -528,14 +510,8 @@ class VitalTable(InputFile):
         audio_data_b64 = self.cache["groups"][0]["components"][0]["audio_file"]
         audio_data = b64_to_array(audio_data_b64)
         audio_data = to_float32(audio_data)
-        samplerate = int(
-            self.cache["groups"][0]["components"][0]["audio_sample_rate"]
-        )
-        frame_size = int(
-            self.cache["groups"][0]["components"][0]["keyframes"][0][
-                "window_size"
-            ]
-        )
+        samplerate = int(self.cache["groups"][0]["components"][0]["audio_sample_rate"])
+        frame_size = int(self.cache["groups"][0]["components"][0]["keyframes"][0]["window_size"])
         num_frames = len(audio_data) / frame_size
         md5 = get_md5(audio_data)
         return frame_size, num_frames, samplerate, audio_data, md5
@@ -565,5 +541,5 @@ class VitalTable(InputFile):
         elif table_type == "Audio File Source":
             values = self.parse_audio_sample()
         else:
-            raise ValueError("VitalTable: Uknown file structure.")
+            raise ValueError("VitalTable: Unknown file structure.")
         return info(*values)

@@ -28,9 +28,7 @@ def invert_phase(
     return audio_data * -1
 
 
-def shuffle(
-    audio_data: np.ndarray, frame_size: int, num_groups: int, seed: int
-) -> np.ndarray:
+def shuffle(audio_data: np.ndarray, frame_size: int, num_groups: int, seed: int) -> np.ndarray:
     """Randomize order of frames"""
     mutable_copy = np.copy(audio_data).reshape(-1)
 
@@ -40,9 +38,7 @@ def shuffle(
 
     num_frames = mutable_copy.size // (frame_size * num_groups) * num_groups
 
-    mutable_copy = mutable_copy[: num_frames * frame_size].reshape(
-        num_groups, -1
-    )
+    mutable_copy = mutable_copy[: num_frames * frame_size].reshape(num_groups, -1)
 
     bit_generator = np.random.PCG64(seed=seed)
     rng = np.random.Generator(bit_generator)
@@ -54,9 +50,7 @@ def shuffle(
     return mutable_copy
 
 
-def fade(
-    audio_data: np.ndarray, frame_size: int, fades: str | list[str]
-) -> np.ndarray:
+def fade(audio_data: np.ndarray, frame_size: int, fades: str | list[str]) -> np.ndarray:
     """Apply fade-in and fade-out to each frame"""
 
     audio_data_as_frames = audio_data.reshape(-1, frame_size)
@@ -101,8 +95,7 @@ def trim(audio_data: np.ndarray, threshold) -> np.ndarray:
     end_idx = len(audio_data) - np.argmax(~mask[::-1])
 
     processing_log.append(
-        "Remove silence from the beginning and end of audio "
-        f"(threshold: {threshold}, max value: {np.max(audio_data)})"
+        f"Remove silence from the beginning and end of audio (threshold: {threshold}, max value: {np.max(audio_data)})"
     )
 
     return audio_data[start_idx:end_idx]
@@ -114,7 +107,7 @@ def resize(
     resize_mode: str,
     frame_size: int,
 ) -> np.ndarray:
-    """Resize array to fit into targer_num_frames"""
+    """Resize array to fit into target_num_frames"""
 
     try:
         audio_data = audio_data.reshape(-1, frame_size)
@@ -124,9 +117,7 @@ def resize(
     resize_mode = resize_mode.lower()
 
     if len(resize_mode) < 3:
-        raise SyntaxError(
-            "Resize mode keyword must be more than 2 letters long"
-        )
+        raise SyntaxError("Resize mode keyword must be more than 2 letters long")
 
     if resize_mode in "truncate":
         # Simply trim the end
@@ -134,17 +125,13 @@ def resize(
         return audio_data[:target_num_frames]
     elif resize_mode in "linear":
         # Sample input array at equal intervals
-        indices = np.linspace(
-            0, len(audio_data) - 1, target_num_frames, dtype=int
-        )
+        indices = np.linspace(0, len(audio_data) - 1, target_num_frames, dtype=int)
         processing_log.append("Resize mode: linear")
         return audio_data[indices]
     elif resize_mode in "bicubic":
         # Use Pillow library
         as_pil = Image.fromarray(audio_data)
-        pil_resized = as_pil.resize(
-            (frame_size, target_num_frames), Image.Resampling.BICUBIC
-        )
+        pil_resized = as_pil.resize((frame_size, target_num_frames), Image.Resampling.BICUBIC)
         new_array = np.array(pil_resized, dtype=np.float32)
         reshaped = new_array.reshape(-1)
         processing_log.append("Resize mode: bicubic")
@@ -190,9 +177,7 @@ def normalize(audio_data: np.ndarray, normalize_to: float) -> np.ndarray:
     return normalized
 
 
-def maximize(
-    audio_data: np.ndarray, frame_size: int, maximize_to: float
-) -> np.ndarray:
+def maximize(audio_data: np.ndarray, frame_size: int, maximize_to: float) -> np.ndarray:
     """Normalize each frame"""
     audio_data = audio_data.reshape(-1, frame_size)
 
@@ -210,18 +195,14 @@ def interpolate(audio_data: np.ndarray, in_frame_size: int, out_frame_size):
     linspace = np.linspace(0, len(audio_data), target_size)
 
     # TODO: fix edge values
-    interpolated = np.interp(
-        linspace, np.arange(len(audio_data)), audio_data
-    ).astype(np.float32)
+    interpolated = np.interp(linspace, np.arange(len(audio_data)), audio_data).astype(np.float32)
 
     peak_value = np.abs(interpolated).max()
     normalize_to = 1.0
     ratio = normalize_to / peak_value
     normalized = interpolated * ratio
 
-    processing_log.append(
-        f"Resample to new frame size: {in_frame_size} -> {out_frame_size}"
-    )
+    processing_log.append(f"Resample to new frame size: {in_frame_size} -> {out_frame_size}")
     return normalized.astype(np.float32)
 
 
@@ -246,10 +227,7 @@ def overlap(audio_data: np.ndarray, frame_size: int, overlap_size: float):
         faded_array[i, -fade_length:] *= fade_out_window
 
     overlapping_array = np.concatenate(
-        [
-            faded_array[i, -num_overlap_samples * 2 :]
-            for i in range(0, faded_array.shape[0])
-        ],
+        [faded_array[i, -num_overlap_samples * 2 :] for i in range(0, faded_array.shape[0])],
         axis=0,
     )
     return overlapping_array
@@ -260,4 +238,5 @@ def splice(audio_data: np.ndarray, num_frames: int):
 
 
 def mix_with_reversed_copy(audio_data: np.ndarray, num_frames: int):
+    """Mix audio data with reversed copy of itself"""
     raise NotImplementedError
