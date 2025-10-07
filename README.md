@@ -61,13 +61,7 @@ What okwt can do for you:
 
 1. Using pip: `pip install okwt`
 
-2. From source:
-
-- `git clone https://github.com/drzhnn/okwt.git`
-- `cd okwt`
-- `pip install .`
-
-3. From source using `uv`:
+2. From source using `uv`:
 
 - `git clone https://github.com/drzhnn/okwt.git`
 - `cd okwt`
