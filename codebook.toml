@@ -1,0 +1,17 @@
+dictionaries = ["en_us"]
+words = [
+    "okwt",
+    "wavetable",
+    "wavetables",
+    "srge",
+    "clm",
+    "uhwt",
+    "vitaltable",
+    "Bitwig",
+    "PCM",
+    "Phaseplant",
+    "Ableton",
+    "venv",
+    "infile",
+    "resave"
+]
