@@ -6,6 +6,7 @@ update:
 	@if [ -z "$(LEVEL)" ]; then echo "Usage: make update LEVEL=major|minor|patch"; exit 1; fi
 	@uv version --bump $(LEVEL)
 	@git add pyproject.toml
+	@git add uv.lock
 	@git commit -m "v$$(uv version --short)"
 	@git tag v$$(uv version --short)
 	@git push
