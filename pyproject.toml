@@ -24,5 +24,12 @@ dependencies = [
 okwt = "okwt.app:main"
 
 [build-system]
-requires = ["uv"]
-build-backend = "uv"
+requires = ["uv_build"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "okwt"
+module-root = ""
+
+[tool.pyright]
+typeCheckingMode = "off"
