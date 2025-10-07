@@ -1,35 +1,36 @@
+.PHONY: update-major update-minor update-patch requirements release publish
+
+# A generic target to handle version bumping.
+# Usage: make update LEVEL=major|minor|patch
+update:
+    @if [ -z "$(LEVEL)" ]; then echo "Usage: make update LEVEL=major|minor|patch"; exit 1; fi
+    @uv version $(LEVEL)
+    @git add pyproject.toml
+    @git commit -m "v$$(uv version --no-header)"
+    @git tag v$$(uv version --no-header)
+    @git push
+    @git push --tags
+    @uv version
+
+# Convenience targets that call the generic 'update' target
 update-major:
-	@poetry version major
-	@git add pyproject.toml
-	@git commit -m "v$$(poetry version -s)"
-	@git tag v$$(poetry version -s)
-	@git push
-	@git push --tags
-	@poetry version
+    $(MAKE) update LEVEL=major
 
 update-minor:
-	@poetry version minor
-	@git add pyproject.toml
-	@git commit -m "v$$(poetry version -s)"
-	@git tag v$$(poetry version -s)
-	@git push
-	@git push --tags
-	@poetry version
+    $(MAKE) update LEVEL=minor
 
 update-patch:
-	@poetry version patch
-	@git add pyproject.toml
-	@git commit -m "v$$(poetry version -s)"
-	@git tag v$$(poetry version -s)
-	@git push
-	@git push --tags
-	@poetry version
+    $(MAKE) update LEVEL=patch
 
+# Generate a requirements.txt file from pyproject.toml
 requirements:
-	@poetry export -f requirements.txt --output requirements.txt --without-hashes
+    @uv export --format requirements-txt --output-file requirements.txt
 
+# Create a GitHub release from the latest tag
 release:
-	@gh release create
+    @gh release create
 
+# Build the distributable packages and publish them to PyPI
 publish:
-	@poetry publish --build
+    @uv build
+    @uv publish
