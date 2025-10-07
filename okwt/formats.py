@@ -43,7 +43,7 @@ class InputFile:
         return self.infile.stat().st_size
 
     @cached_property
-    def cache(self) -> bytes | dict:
+    def cache(self) -> bytes | dict | Image.Image | memoryview:
         if self.extension in Picture.SUPPORTED_FORMATS:
             cache = Image.open(self.infile)
             return cache
